@@ -1,17 +1,12 @@
-# Petit Lepton's blog
+<!-- # Petit Lepton's -->
 
 ```{toctree}
 ---
 maxdepth: 1
 caption: Contents
+hidden: True
 ---
 
 about_me
-```
-
-``` {postlist} 10
----
-date: "%Y-%m-%d"
-format: "{date} - {title}"
----
+posts
 ```

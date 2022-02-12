@@ -1,5 +1,5 @@
 sphinx
 myst-parser
-pydata-sphinx-theme
 ablog
-
+sphinx_material
+livereload
