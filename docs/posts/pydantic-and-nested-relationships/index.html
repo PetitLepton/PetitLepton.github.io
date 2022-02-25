@@ -259,7 +259,7 @@
 <li><p>formatting of the serialization, even for models which include relationships.</p></li>
 </ul>
 <p>The code for this illustration is shown below and will be decomposed in the coming paragraphs.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
@@ -357,7 +357,7 @@
 <section id="sqlalchemy-models">
 <h2>SQLalchemy models<a class="headerlink" href="#sqlalchemy-models" title="Permalink to this headline">¶</a></h2>
 <p>At first, I am creating two models/tables. The main model <code class="docutils literal notranslate"><span class="pre">User</span></code> is defined by its primary key <code class="docutils literal notranslate"><span class="pre">id</span></code>, a <code class="docutils literal notranslate"><span class="pre">name</span></code> field and the relation to a second model <code class="docutils literal notranslate"><span class="pre">Comment</span></code>. The <code class="docutils literal notranslate"><span class="pre">Comment</span></code> model operates a many-to-one relationship to <code class="docutils literal notranslate"><span class="pre">User</span></code>, a user can “create” several comments.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
     <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>
     <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -375,10 +375,12 @@
 </pre></div>
 </div>
 <p>The application of these models is done in the main part of the code where a single instance of <code class="docutils literal notranslate"><span class="pre">User</span></code> is created, followed by two comments.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
-<span class="n">first_comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s2">&quot;First comment.&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
-<span class="n">second_comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Second comment.&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="k">with</span> <span class="n">Session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+
+<span class="hll">        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
+</span><span class="hll">        <span class="n">first_comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s2">&quot;First comment.&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+</span><span class="hll">        <span class="n">second_comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Second comment.&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+</span></pre></div>
 </div>
 </section>
 <section id="pydantic-for-de-serialization">
@@ -386,25 +388,14 @@
 <p>After the SQLalchemy models comes two sets of serializers:</p>
 <ul class="simple">
 <li><p>the first set, <code class="docutils literal notranslate"><span class="pre">CommentSerializer</span></code> and <code class="docutils literal notranslate"><span class="pre">UserSerializer</span></code>, covering all the parameters that the SQLalchemy models offer (including the primary keys which are settled upon commit). The <code class="docutils literal notranslate"><span class="pre">orm_mode=True</span></code> allows for passing the instance of the model directly into the serializer. As you can see, there is no tweaking;</p></li>
-<li><p>the second set, <code class="docutils literal notranslate"><span class="pre">CommentToStringSerializer</span></code> and <code class="docutils literal notranslate"><span class="pre">UserWithoutIDSerializer</span></code>, illustrates the possibilities offered by <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>, namely filtering out unnecessary parameters (here <code class="docutils literal notranslate"><span class="pre">id</span></code> and <code class="docutils literal notranslate"><span class="pre">user_id</span></code>) and transforming the result of the <code class="docutils literal notranslate"><span class="pre">dict</span></code> method.</p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CommentSerializer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CommentSerializer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
         <span class="n">orm_mode</span> <span class="o">=</span> <span class="kc">True</span>
-
-
-<span class="k">class</span> <span class="nc">CommentToStringSerializer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span>
-
-    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
-        <span class="n">orm_mode</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="k">def</span> <span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dict</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comment&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">UserSerializer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
@@ -414,6 +405,19 @@
 
     <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
         <span class="n">orm_mode</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>the second set, <code class="docutils literal notranslate"><span class="pre">CommentToStringSerializer</span></code> and <code class="docutils literal notranslate"><span class="pre">UserWithoutIDSerializer</span></code>, illustrates the possibilities offered by <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>, namely filtering out unnecessary parameters (here <code class="docutils literal notranslate"><span class="pre">id</span></code> and <code class="docutils literal notranslate"><span class="pre">user_id</span></code>) and transforming the result of the <code class="docutils literal notranslate"><span class="pre">dict</span></code> method.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CommentToStringSerializer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+        <span class="n">orm_mode</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dict</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comment&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">UserWithoutIDSerializer</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
@@ -429,24 +433,28 @@
 <h2>Deserialization of queries results<a class="headerlink" href="#deserialization-of-queries-results" title="Permalink to this headline">¶</a></h2>
 <p>With those sets of models and serializers, I can now illustrate on an example the handy features of the deserialization offered by <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>.</p>
 <p>I am using a simple SQLite in-memory database. As mentioned before, after creating the tables, those are fed with a single user and two comments for them. Once committed, both the user and the comments acquire their respective <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s2">&quot;sqlite://&quot;</span><span class="p">)</span>
-<span class="n">Session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
-<span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
-<span class="k">with</span> <span class="n">Session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s2">&quot;sqlite://&quot;</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">Session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
 
-    <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
-    <span class="n">first_comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s2">&quot;First comment.&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
-    <span class="n">second_comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Second comment.&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">Session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 
-    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Alice&quot;</span><span class="p">)</span>
+        <span class="n">first_comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s2">&quot;First comment.&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">second_comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Second comment.&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+
+        <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The first serialization</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bare_result</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-<span class="c1"># ...</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bare_result = </span><span class="si">{</span><span class="n">bare_result</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="hll">        <span class="n">bare_result</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+</span>        <span class="n">tweaked_result</span> <span class="o">=</span> <span class="n">UserWithoutIDSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+
+<span class="hll">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bare_result = </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">bare_result</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tweaked_result = </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">tweaked_result</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>indeed reads as</p>
@@ -469,10 +477,12 @@
 </pre></div>
 </div>
 <p>The second serialization</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tweaked_result</span> <span class="o">=</span> <span class="n">UserWithoutIDSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-<span class="c1"># ...</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tweaked_result = </span><span class="si">{</span><span class="n">tweaked_result</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="n">bare_result</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+<span class="hll">        <span class="n">tweaked_result</span> <span class="o">=</span> <span class="n">UserWithoutIDSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bare_result = </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">bare_result</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="hll">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tweaked_result = </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">tweaked_result</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></pre></div>
 </div>
 <p>highlights the capabilities of <code class="docutils literal notranslate"><span class="pre">pydantic</span></code> as the result reads as</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tweaked_result</span> <span class="o">=</span> <span class="p">{</span>
@@ -485,8 +495,8 @@
 </pre></div>
 </div>
 <p>As expected, the <code class="docutils literal notranslate"><span class="pre">id</span></code> disappeared from the response <code class="docutils literal notranslate"><span class="pre">tweaked_result</span></code> while the list of comments only contains the strings. Note that the parsing has been done on the same instance <code class="docutils literal notranslate"><span class="pre">user</span></code> as fed to <code class="docutils literal notranslate"><span class="pre">bare_result</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bare_result</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-<span class="n">tweaked_result</span> <span class="o">=</span> <span class="n">UserWithoutIDSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="n">bare_result</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+        <span class="n">tweaked_result</span> <span class="o">=</span> <span class="n">UserWithoutIDSerializer</span><span class="o">.</span><span class="n">from_orm</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">pydantic</span></code> is responsible for the formatting of the response.</p>
