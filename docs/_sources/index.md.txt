@@ -1,4 +1,4 @@
-<!-- # Petit Lepton's -->
+# Is there something to read?
 
 ```{toctree}
 ---
@@ -11,4 +11,4 @@ about_me
 posts
 ```
 
-This page is definitely empty. Contents is on the left.
+This page is definitely empty but the contents is on the left.
