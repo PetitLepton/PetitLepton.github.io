@@ -62,7 +62,7 @@ html_theme_options = {
     "master_doc": False,
 }
 
-pygments_style = "emacs"
+pygments_style = "tango"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
