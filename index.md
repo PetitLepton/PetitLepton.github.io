@@ -10,3 +10,5 @@ hidden: True
 about_me
 posts
 ```
+
+This page is definitely empty. Contents is on the left.

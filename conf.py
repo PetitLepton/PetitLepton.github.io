@@ -55,11 +55,14 @@ html_theme = "sphinx_material"
 html_title = "Random thoughts by Flavien"
 html_short_title = html_title
 html_theme_options = {
-    "globaltoc_depth": 1,
     "color_primary": "blue-grey",
     "color_accent": "pink",
-    "nav_links": [],
+    # Remove all links in the nav bar
+    "globaltoc_depth": 0,
+    "master_doc": False,
 }
+
+pygments_style = "emacs"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
